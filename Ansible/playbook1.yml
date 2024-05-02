@@ -1,0 +1,33 @@
+- hosts: all
+  become: yes
+
+  tasks:
+#  - name: "Copy SSH Key"
+#    authrized_key:
+#      user: root
+#      state: present
+#      key: "{{ lookup('file', '/home/root/.ssh/id_rsa.pub') }}"
+
+  - name: "Update apt cache"
+    apt:
+      update_cache: yes
+
+  - name: "SSH Configuration"
+    lineinfile:
+      dest: /etc/ssh/sshd_config
+      regexp: '^#PermitRootLogin'
+      line: 'PermitRootLogin yes'
+      state: present
+    lineinfile:
+      dest: /etc/ssh/sshd_config
+      regexp: '^#AllowTcpForwarding no'
+      line: 'AllowTcpForwarding yes'
+      state: present
+    notify:
+      - restart ssh
+
+  handlers:
+  - name: restart ssh
+    service:
+      name: sshd
+      state: restarted
